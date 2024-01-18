@@ -1,5 +1,6 @@
 package com.olive.service;
 
+import com.olive.dto.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -15,7 +16,7 @@ public class KafkaMessagePublisher {
 
 
     public void sendMessageToTopic(String message){
-        CompletableFuture<SendResult<String, Object>> future = template.send("kafka-demo-4", message);
+        CompletableFuture<SendResult<String, Object>> future = template.send("kafka-test-object", message);
         future.whenComplete((result,ex)->{
             if (ex == null) {
                 System.out.println("Sent message=[" + message +
@@ -26,5 +27,23 @@ public class KafkaMessagePublisher {
             }
         });
 
+    }
+
+    public void sendEventsToTopic(Customer customer) {
+        try {
+            CompletableFuture<SendResult<String, Object>> future = template.send("kafka-test-object", customer);
+            future.whenComplete((result, ex) -> {
+                if (ex == null) {
+                    System.out.println("Sent message=[" + customer.toString() +
+                            "] with offset=[" + result.getRecordMetadata().offset() + "]");
+                } else {
+                    System.out.println("Unable to send message=[" +
+                            customer.toString() + "] due to : " + ex.getMessage());
+                }
+            });
+
+        } catch (Exception ex) {
+            System.out.println("ERROR : "+ ex.getMessage());
+        }
     }
 }
